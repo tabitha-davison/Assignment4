@@ -32,7 +32,7 @@ function [t_list,X_list,h_avg, num_evals] = explicit_RK_fixed_step_integration .
     %calculate the values until it is just short of the end value
     for i = 1:num_steps
         t = t_list(i);
-        [XB, temp_eval] = explicit_RK_step(rate_func_in,t,XA,h_avg);
+        [XB, temp_eval] = explicit_RK_step_tabby(rate_func_in,t,XA,h_avg);
         num_evals = num_evals + temp_eval;
 
         X_list(i+1,:)= XB';

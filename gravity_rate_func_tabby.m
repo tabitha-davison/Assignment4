@@ -32,13 +32,6 @@ function dVdt = gravity_rate_func(t,V,orbit_params)
     % Construct the derivative of the state vector dVdt
     dVdt = [vx; vy; ax; ay];
 
-
-%     tspan = [0, 3.154e7];
-%     h_ref = 86400; % 1 day (in seconds)
-%     
-%     [t_list, X_list, h_avg, num_evals] = explicit_RK_fixed_step_integration( ...
-%         @gravity_rate_func, tspan, X0, h_ref, BT_struct, orbit_params);
-%     
 %     figure;
 %     plot(X_list(:, 1), X_list(:, 2));
 %     xlabel('x position (m)');
