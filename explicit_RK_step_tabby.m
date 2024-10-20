@@ -19,5 +19,11 @@
 % rate_func_in when computing the next step
 
 function [XB, num_evals] = explicit_RK_step(rate_func_in,t,XA,h,BT_struct)
-%your code here
+   
+XB = XA + h*BT_struct.C_list(1)*rate_func_in(t, XA);
+
+num_evals = 1;
+
 end
+
+
