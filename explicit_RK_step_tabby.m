@@ -19,10 +19,22 @@
 % rate_func_in when computing the next step
 
 function [XB, num_evals] = explicit_RK_step(rate_func_in,t,XA,h,BT_struct)
-   
-XB = XA + h*BT_struct.C_list(1)*rate_func_in(t, XA);
 
-num_evals = 1;
+    % Get the number of stages in the Runge-Kutta method (s is length of C or rows of A)
+    s = length(BT_struct.C);
+    
+    % Initialize the K matrix (each column represents a stage's evaluation)
+    K = zeros(length(XA), s);
+
+    for i = 1:s
+        sum_ki = K * BT_struct.A(i, :)'; % Weighted sum of previous ks
+        K(:, i) = rate_func_in(t + BT_struct.C(i) * h, XA + h * sum_ki);
+    end
+    
+    % Compute the next value using weighted sum of ks
+    XB = XA + h * (K * BT_struct.B);
+    
+    num_evals = 1;
 
 end
 
