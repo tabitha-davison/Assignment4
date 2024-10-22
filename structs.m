@@ -1,5 +1,3 @@
-
-
 BT_struct = struct();
 BT_struct.A = [0, 0; 0.5, 0]; % A matrix
 BT_struct.B = [0; 1]; % B vector
