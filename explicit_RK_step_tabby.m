@@ -18,21 +18,18 @@
 
 function [XB, num_evals] = explicit_RK_step_tabby(rate_func_in,t,XA,h,BT_struct)
 
-    % Get the number of stages in the Runge-Kutta method (s is length of C or rows of A)
-   
-    XA
+    % XA
     % Initialize the K matrix (each column represents a stage's evaluation)
     K = zeros(length(XA), length(BT_struct.B));
     for i = 1:length(BT_struct.B)
-        K
-        BT_struct.A(i, :)'
+        % K
+        % BT_struct.A(i, :)'
         sum_ki = K * BT_struct.A(i, :)'; % Weighted sum of previous ks
         K(:, i) = rate_func_in(t + (BT_struct.C(i) * h), XA + (h * sum_ki));
     end
     
     % Compute the next value using weighted sum of ks
-    XA_TEST = XA
-    XB = XA + h * (K * BT_struct.B')
+    XB = XA + h * (K * BT_struct.B');
     
     num_evals = length(BT_struct.B);
 

@@ -31,12 +31,4 @@ function dVdt = gravity_rate_func(t,V,orbit_params)
     % Construct the derivative of the state vector dVdt
     dVdt = [vx; vy; ax; ay];
 
-%     figure;
-%     plot(X_list(:, 1), X_list(:, 2));
-%     xlabel('x position (m)');
-%     ylabel('y position (m)');
-%     title('Planetary Orbit');
-%     grid on;
-%     axis equal;
-
 end

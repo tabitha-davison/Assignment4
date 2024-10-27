@@ -1,8 +1,8 @@
 function runner()
     
     tspan =  [0,10];
-    X0 = solution01(tspan(2));
-    h_ref = 1;
+    X0 = solution01(tspan(1));
+    h_ref = 0.1;
 
     DormandPrince = struct();
     DormandPrince.C = [0, 1/5, 3/10, 4/5, 8/9, 1, 1];
@@ -18,19 +18,12 @@ function runner()
 
     [t_list,X_list,h_avg, num_evals] = explicit_RK_fixed_step_integration_tabby ...
     (@rate_func01,tspan,X0,h_ref,DormandPrince)
-    
-
+    solution01(t_list)
     % X_list
+    figure(1)
+    clf
     hold on
     plot(t_list, X_list, "r")
     plot(t_list, solution01(t_list), "b")
     
-end
-
-function dXdt = rate_func01(t,X)
-    dXdt = -5*X + 5*cos(t) - sin(t);
-end
-
-function X = solution01(t)
-    X = cos(t);
 end
