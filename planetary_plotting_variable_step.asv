@@ -19,7 +19,7 @@ function planetary_plotting_variable_step()
     % set up time range
     t_range = linspace(0, 30, 100);
     h_ref = 0.000001;
-    h_values = logspace(-5,-1,100);
+    h_values = logspace(-5,1,10);
 
     % compute true planetary motion using ground truth function
     V_list_truth = compute_planetary_motion(t_range, V0, orbit_params);
@@ -58,15 +58,15 @@ function planetary_plotting_variable_step()
     for i = 1:length(h_values)
         [t_list, V_list_rk, ~, ~] = ...
             explicit_RK_variable_step_integration(gravity_rate_func, ...
-            t_range, V0, h_values(i), Bogacki, p, error_d);
+            t_range, V0, h, Bogacki, p, error_d);
         V_list_rk = V_list_rk';
-
-        final_energy = calc_mech_energy(V_list_rk(end, :), orbit_params);
-        final_angular_momentum = calc_angular_momentum(V_list_rk(end, :), orbit_params);
+        
+        current_energy = calc_mech_energy(V_list_rk(i, :), orbit_params);
+        current_angular_momentum = calc_angular_momentum(V_list_rk(i, :), orbit_params);
 
         % Compute error
-        energy_errors(i) = abs((final_energy - initial_energy) / initial_energy);
-        angular_momentum_errors(i) = abs((final_angular_momentum - initial_angular_momentum) / initial_angular_momentum);
+        energy_error(i) = abs((current_energy - initial_energy) / initial_energy);
+        angular_momentum_error(i) = abs((current_angular_momentum - initial_angular_momentum) / initial_angular_momentum);
     end
 
     % plot results
@@ -98,15 +98,15 @@ function planetary_plotting_variable_step()
 
     %Experiement plots 
     figure;
-    loglog(h_values, energy_errors, 'b-o', 'LineWidth', 1.5, 'DisplayName', 'Energy Error');
-    hold on;
-    loglog(h_values, angular_momentum_errors, 'r-o', 'LineWidth', 1.5, 'DisplayName', 'Angular Momentum Error');
-    ylim([1e-8, 1e-4]);
-
-    title('Errors in Energy and Angular Momentum vs Step Size (h)');
-    xlabel('Step Size (h)');
+    subplot(2, 1, 1);
+    plot(t_list, energy_error, 'b-', 'LineWidth', 1.5);
+    title('Error in Mechanical Energy');
+    xlabel('Time');
     ylabel('Error');
-    legend('Location', 'Best');
-    grid on;
-    hold off;
+
+    subplot(2, 1, 2);
+    plot(t_list, angular_momentum_error, 'r-', 'LineWidth', 1.5);
+    title('Error in Angular Momentum');
+    xlabel('Time');
+    ylabel('Error');
 end

@@ -18,7 +18,7 @@ function runner()
 
     [t_list,X_list,h_avg, num_evals] = explicit_RK_fixed_step_integration_tabby ...
     (@rate_func01,tspan,X0,h_ref,DormandPrince)
-    solution01(t_list)
+    solution01(t_list);
     % X_list
     figure(1)
     clf
