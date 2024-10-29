@@ -3,7 +3,7 @@ function local_truncation_error()
     % values of h_ref, and plot them against each other. Also uses loglog
     % regression to solve for k and p values of error
     
-    tspan =  [0,10];
+    tspan =  [1,10];
     X0 = solution01(tspan(1));
     h_ref = 0.1;
 
@@ -42,7 +42,7 @@ function local_truncation_error()
     for i = 1:length(h_refs)
         % X_next with the midpoint and euer method
         [XB1, XB2, ~] = RK_step_embedded(@rate_func01,t1,X0,h_refs(i),DormandPrince)
-        X0 = XB2
+        % X0 = XB2
 
         % solving for the analytical solution
         X_sol(:, i) = solution01(t1 + h_refs(i));
@@ -52,28 +52,35 @@ function local_truncation_error()
         XB2_errors(i) = norm(XB2- X_sol(:, i));
         XB1_XB2_errors(i) = norm(XB1-XB2);
         
-        analytical(i) = norm(X_sol(:, i) - X0_solution);
+        analytical(i) = norm(X_sol(:, i) - X0);
     end
         
     % using provided log regression function to solve for each method's p
     % and k values
     
-    filter_params.min_xval = 10e-4;
-    filter_params.max_xval = 10e-2;
+    filter_params.min_xval = 1e-5;
+    filter_params.max_xval = 1e-1;
+    filter_params.min_yval = 1e-14;
+    filter_params.max_yval = 1e0;
     
     [p_XB1, k_XB1] = loglog_fit(h_refs, XB1_errors, filter_params);
     [p_XB2, k_XB2] = loglog_fit(h_refs, XB2_errors, filter_params);
     [p_XB1_XB2, k_XB1_XB2] = loglog_fit(h_refs, XB1_XB2_errors, filter_params);
     [p_analytical, k_analytical] = loglog_fit(h_refs, analytical, filter_params);
 
+    p_XB1
+    p_XB2
+    p_XB1_XB2
+    p_analytical
     % plotting errors on a log scale
     clf;
 
     % plotting calculated data
-    ylim([10^-40 10^20]);
-    xlim([10^-5 1]);
+    
     loglog(h_refs, XB1_errors, 'ro','markerfacecolor','r','markersize',2)
     hold on
+    ylim([10^-15 10]);
+    xlim([10^-6 10]);
     loglog(h_refs, XB2_errors, 'bo','markerfacecolor','r','markersize',2)
     loglog(h_refs, XB1_XB2_errors, 'mo','markerfacecolor','r','markersize',2)
     loglog(h_refs, analytical, 'go', 'markerfacecolor', 'g', 'markersize', 2)

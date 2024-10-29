@@ -42,7 +42,7 @@ function local_truncation_error()
     for i = 1:length(h_refs)
         % X_next with the midpoint and euer method
         [XB1, XB2, ~] = RK_step_embedded(@rate_func01,t1,X0,h_refs(i),DormandPrince)
-        X0 = XB1
+        % X0 = XB2
 
         % solving for the analytical solution
         X_sol(:, i) = solution01(t1 + h_refs(i));
@@ -58,24 +58,31 @@ function local_truncation_error()
     % using provided log regression function to solve for each method's p
     % and k values
     
-    filter_params.min_xval = 10e-4;
-    filter_params.max_xval = 10e-2;
+    filter_params.min_xval = 1e-4;
+    filter_params.max_xval = 1e-2;
+    filter_params.min_yval = 1e-14;
+    filter_params.max_yval = 1e0;
     
     [p_XB1, k_XB1] = loglog_fit(h_refs, XB1_errors, filter_params);
     [p_XB2, k_XB2] = loglog_fit(h_refs, XB2_errors, filter_params);
     [p_XB1_XB2, k_XB1_XB2] = loglog_fit(h_refs, XB1_XB2_errors, filter_params);
     [p_analytical, k_analytical] = loglog_fit(h_refs, analytical, filter_params);
 
+    p_XB1
+    p_XB2
+    p_XB1_XB2
+    p_analytical
     % plotting errors on a log scale
     clf;
 
     % plotting calculated data
-    ylim([10^-40 10^20]);
-    xlim([10^-5 1]);
+    
     loglog(h_refs, XB1_errors, 'ro','markerfacecolor','r','markersize',2)
     hold on
+    ylim([10^-15 10]);
+    xlim([10^-6 10]);
     loglog(h_refs, XB2_errors, 'bo','markerfacecolor','r','markersize',2)
-    loglog(h_refs, XB1_XB2_errors, 'ko','markerfacecolor','r','markersize',2)
+    loglog(h_refs, XB1_XB2_errors, 'mo','markerfacecolor','r','markersize',2)
     loglog(h_refs, analytical, 'go', 'markerfacecolor', 'g', 'markersize', 2)
 
     % and now solving lines of best fit
@@ -86,14 +93,14 @@ function local_truncation_error()
     fit_line_analytical = k_analytical*fit_line_x.^p_analytical;
 
     % plotting lines of best fit
-    loglog(fit_line_x, fit_line_XB1_errors, 'c-','markerfacecolor','r','markersize',1)
-    loglog(fit_line_x, fit_line_XB2_errors, 'm-','markerfacecolor','r','markersize',1)
+    loglog(fit_line_x, fit_line_XB1_errors, 'r--','markerfacecolor','r','markersize',1)
+    loglog(fit_line_x, fit_line_XB2_errors, 'b-','markerfacecolor','r','markersize',1)
     loglog(fit_line_x, fit_line_XB1_XB2_errors, 'm-','markerfacecolor','r','markersize',1)
-    loglog(fit_line_x, fit_line_analytical, 'y-','markerfacecolor','r','markersize',1)
-    title("Local Truncation Error Plot: Midpoint, Forward Euler Vs. Analytical Methods")
+    loglog(fit_line_x, fit_line_analytical, 'g-','markerfacecolor','r','markersize',1)
+    title("Local Truncation Error Plot: XB1, XB2 Vs. Analytical Methods and |XB1-XB2|")
     xlabel("h values [-]")
     ylabel("error [-]")
-    legend("XB1 errors", "XB2 errors", "XB1-XB2 errors", "Analytical Fit",...
-        "XB1 errors", "XB1 errors", 'XB1-XB2 errors', 'Analytical', 'nw')
+    legend("XB1 errors", "XB2 errors", "XB1-XB2 errors", "Analytical",...
+        "XB1 errors Fit", "XB2 errors Fit", 'XB1-XB2 errors Fit', 'Analytical Fit', 'location', 'nw')
     
 end
