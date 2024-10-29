@@ -13,11 +13,11 @@ function [t_list,X_list,h_avg, num_evals] = explicit_RK_variable_step_integratio
     [num_steps, h_next] = iteration_solver(tspan, h_ref);
     
     % define variables
-    XA = X0
+    XA = X0;
     num_evals = 0;
-    t_current = 0;
+    t_current = tspan(1);
     t_list = tspan(1);
-    X_list = X0;
+    X_list = X0';
     % t_list = linspace(tspan(1),tspan(2),num_steps+1);
     % X_list = zeros(num_steps+1,length(X0))
     % X_list(1,:) = X0';
@@ -31,13 +31,12 @@ function [t_list,X_list,h_avg, num_evals] = explicit_RK_variable_step_integratio
             t_next = tspan(2);
         end
 
-        % [XB, temp_eval] = explicit_RK_step_tabby(rate_func_in,t,XA,h_avg, BT_struct);
         [XB, evals, h_next, redo] = explicit_RK_variable_step...
-         (rate_func_in, t_next, XA, h_next, BT_struct, p, error_desired)
+         (rate_func_in, t_next, XA, h_next, BT_struct, p, error_desired);
         if ~ redo
             t_current = t_next;
             XA = XB;
-            X_list(:, end+1) = XB;
+            X_list(end+1,:) = XB';
             t_list(end+1) = t_current;
             num_evals = num_evals + evals;
         end
