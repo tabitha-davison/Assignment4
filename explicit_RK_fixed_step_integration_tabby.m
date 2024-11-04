@@ -16,23 +16,24 @@
 %num_evals: total number of calls made to rate_func_in during the integration
 
 
-function [t_list,X_list,h_avg, num_evals] = explicit_RK_fixed_step_integration_tabby ...
-(rate_func_in,tspan,X0,h_ref,BT_struct)
+function [t_list,X_list, num_evals] = explicit_RK_fixed_step_integration_tabby ...
+(rate_func_in,tspan,X0,h_ref,struct)
 
     % calculate steps and h
-    [num_steps, h_avg] = iteration_solver(tspan, h_ref);
+    [num_steps, h] = iteration_solver(tspan, h_ref);
+
+    h;
     
     % define variables
-    XA = X0
+    XA = X0;
     num_evals = 0;
     t_list = linspace(tspan(1),tspan(2),num_steps+1);
-    X_list = zeros(num_steps+1,length(X0))
+    X_list = zeros(num_steps+1,length(X0));
     X_list(1,:) = X0';
     % calculate the values until it is just short of the end value
     for i = 1:num_steps
         t = t_list(i);
-        % [XB, temp_eval] = explicit_RK_step_tabby(rate_func_in,t,XA,h_avg, BT_struct);
-        [XB1, XB2, temp_eval] = RK_step_embedded(rate_func_in,t,XA,h_avg,BT_struct)
+        [XB1, XB2, temp_eval] = RK_step_embedded(rate_func_in,t,XA,h,struct)
         num_evals = num_evals + temp_eval;
         X_list(i,:) = XB1;
         X_list(i+1,:) = XB2;
