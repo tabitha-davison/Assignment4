@@ -1,4 +1,4 @@
-function planetary_plotting_variable_step()
+function planetary_plot_variable_step()
 
     % set up params for sun and planet
     orbit_params = struct();
@@ -19,8 +19,7 @@ function planetary_plotting_variable_step()
     % set up time range
     t_range = linspace(0, 30, 100);
     h_ref = 0.000001;
-    h_values = logspace(-5,-1,100);
-
+    
     % compute true planetary motion using ground truth function
     V_list_truth = compute_planetary_motion(t_range, V0, orbit_params);
     
@@ -40,37 +39,18 @@ function planetary_plotting_variable_step()
     error_d = 0.001;
 
     % compute next step using explicit RK integration
-    [t_list, V_list_rk, ~, ~] = ...
+    [~, V_list_rk, ~, ~] = ...
     explicit_RK_variable_step_integration(gravity_rate_func, ...
     [t_range(1), t_range(end)], V0, h_ref, Bogacki, p, error_d);
 
     V_list_rk = V_list_rk';
-    
-    % Mechanical energy and angylar momentum error 
-    energy_error = zeros(length(t_list), 1);
-    angular_momentum_error = zeros(length(t_list), 1);
-    
-    %Calc initial values for error
-    initial_energy = calc_mech_energy(V0, orbit_params);
-    initial_angular_momentum = calc_angular_momentum(V0, orbit_params);
 
-    % Calculate errors at each timestep
-    for i = 1:length(h_values)
-        [t_list, V_list_rk, ~, ~] = ...
-            explicit_RK_variable_step_integration(gravity_rate_func, ...
-            t_range, V0, h_values(i), Bogacki, p, error_d);
-        V_list_rk = V_list_rk';
 
-        final_energy = calc_mech_energy(V_list_rk(end, :), orbit_params);
-        final_angular_momentum = calc_angular_momentum(V_list_rk(end, :), orbit_params);
-
-        % Compute error
-        energy_errors(i) = abs((final_energy - initial_energy) / initial_energy);
-        angular_momentum_errors(i) = abs((final_angular_momentum - initial_angular_momentum) / initial_angular_momentum);
-    end
+    % % ode45 integration with gravity_rate_func
+    % [~, V_ode45] = ode45(@(t, V) my_rate_func(t, V), t_range, V0);
 
     % plot results
-    figure(1);
+    figure;
     hold on;
     axis equal; 
     axis square;
@@ -88,7 +68,6 @@ function planetary_plotting_variable_step()
     plot(V_list_rk(:, 1), V_list_rk(:, 2), ...
         'g--', 'LineWidth', 1.5, 'DisplayName', method);
 
-
     % add labels
     legend('Location', 'Best');
     title('Planetary Motion: Ground Truth vs Bogacki RK Method');
@@ -96,17 +75,4 @@ function planetary_plotting_variable_step()
     ylabel('Y Position');
     hold off;
 
-    %Experiement plots 
-    figure(2);
-    loglog(h_values, energy_errors, 'b-o', 'LineWidth', 1.5, 'DisplayName', 'Energy Error');
-    hold on;
-    loglog(h_values, angular_momentum_errors, 'r-o', 'LineWidth', 1.5, 'DisplayName', 'Angular Momentum Error');
-    ylim([1e-8, 1e-4]);
-
-    title('Errors in Energy and Angular Momentum vs Step Size (h)');
-    xlabel('Step Size (h)');
-    ylabel('Error');
-    legend('Location', 'Best');
-    grid on;
-    hold off;
 end
