@@ -19,6 +19,7 @@ function local_truncation_error()
     9017/3168, -355/33, 46732/5247, 49/176, -5103/18656, 0,0;...
     35/384, 0, 500/1113, 125/192, -2187/6784, 11/84,0];
 
+
     % controlled variables for rate_func01
     t1 = tspan(1);
     X01_sol = solution01(t1);
@@ -35,13 +36,16 @@ function local_truncation_error()
     XB1_errors = zeros(length(h_refs),1);
     XB2_errors = zeros(length(h_refs),1);
     XB1_XB2_errors = zeros(length(h_refs),1);
+    difference = [];
+    t_ref = t1
     
     X_sol = zeros(length(X0_solution), length(h_refs));
     analytical = zeros(length(h_refs), 1);
 
     for i = 1:length(h_refs)
+        h = h_refs(i);
         % X_next with the midpoint and euer method
-        [XB1, XB2, ~] = RK_step_embedded(@rate_func01,t1,X0,h_refs(i),DormandPrince)
+        [XB1, XB2, ~] = RK_step_embedded(@rate_func01,t1,X0,h_refs(i),DormandPrince);
         % X0 = XB2
 
         % solving for the analytical solution
@@ -53,8 +57,12 @@ function local_truncation_error()
         XB1_XB2_errors(i) = norm(XB1-XB2);
         
         analytical(i) = norm(X_sol(:, i) - X0);
+        difference = [difference, norm(X_sol(:, i) -solution01(t_ref))];
+
+    
     end
         
+
     % using provided log regression function to solve for each method's p
     % and k values
     
@@ -66,24 +74,9 @@ function local_truncation_error()
     [p_XB1, k_XB1] = loglog_fit(h_refs, XB1_errors, filter_params);
     [p_XB2, k_XB2] = loglog_fit(h_refs, XB2_errors, filter_params);
     [p_XB1_XB2, k_XB1_XB2] = loglog_fit(h_refs, XB1_XB2_errors, filter_params);
-    [p_analytical, k_analytical] = loglog_fit(h_refs, analytical, filter_params);
+    [p_diff, k_diff] = loglog_fit(h_refs, difference, filter_params);
+    [p_analytical, k_analytical] = loglog_fit(h_refs, analytical, filter_params)
 
-    p_XB1
-    p_XB2
-    p_XB1_XB2
-    p_analytical
-    % plotting errors on a log scale
-    clf;
-
-    % plotting calculated data
-    
-    loglog(h_refs, XB1_errors, 'ro','markerfacecolor','r','markersize',2)
-    hold on
-    ylim([10^-15 10]);
-    xlim([10^-6 10]);
-    loglog(h_refs, XB2_errors, 'bo','markerfacecolor','r','markersize',2)
-    loglog(h_refs, XB1_XB2_errors, 'mo','markerfacecolor','r','markersize',2)
-    loglog(h_refs, analytical, 'go', 'markerfacecolor', 'g', 'markersize', 2)
 
     % and now solving lines of best fit
     fit_line_x = 10e-7:0.1:10e1;
@@ -94,6 +87,7 @@ function local_truncation_error()
 
     % plotting lines of best fit
     loglog(fit_line_x, fit_line_XB1_errors, 'r--','markerfacecolor','r','markersize',1)
+    hold on;
     loglog(fit_line_x, fit_line_XB2_errors, 'b-','markerfacecolor','r','markersize',1)
     loglog(fit_line_x, fit_line_XB1_XB2_errors, 'm-','markerfacecolor','r','markersize',1)
     loglog(fit_line_x, fit_line_analytical, 'g-','markerfacecolor','r','markersize',1)
@@ -102,5 +96,28 @@ function local_truncation_error()
     ylabel("error [-]")
     legend("XB1 errors", "XB2 errors", "XB1-XB2 errors", "Analytical",...
         "XB1 errors Fit", "XB2 errors Fit", 'XB1-XB2 errors Fit', 'Analytical Fit', 'location', 'nw')
+    hold off;
+
+    figure;
+    loglog(XB1_XB2_errors, XB1_errors, 'ro-', 'DisplayName', 'Error XB1 vs |XB1 - XB2|');
+    hold on;
+    loglog(XB1_XB2_errors, XB2_errors, 'bo-', 'DisplayName', 'Error XB2 vs |XB1 - XB2|');
+    xlabel('|XB1 - XB2|');
+    ylabel('Local Truncation Error');
+    title('Truncation Errors of XB1 and XB2 as a Function of |XB1 - XB2|');
+    legend;
+    hold off;
+    
+    figure;
+    loglog(h_refs, XB1_errors, 'ro-', 'DisplayName', 'Local Truncation Error XB1');
+    hold on;
+    loglog(h_refs, XB2_errors, 'bo-', 'DisplayName', 'Local Truncation Error XB2');
+    loglog(h_refs, difference, 'ko-', 'DisplayName', '|f(t_{ref} + h) - f(t_{ref})|');
+    loglog(h_refs, XB1_XB2_errors, 'go-', 'DisplayName', '|XB1 - XB2|');
+        xlabel("h values [-]")
+        ylabel("error [-]")
+    title('Local Truncation Error Plot: XB1, XB2 Vs |f(t_{ref} + h) - f(t_{ref})|');
+    hold off;
+
     
 end
